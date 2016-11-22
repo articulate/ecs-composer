@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 require 'yaml'
 
-DEFAULT_MEM_LIMIT = 256000000
+DEFAULT_MEM_LIMIT = '256m'
 
 image_name = ARGV[0]
 build_name = ARGV[1]
@@ -20,6 +20,8 @@ compose["services"].each do |service_name, service|
   service["image"] = image_name if service.delete("build")
   service["mem_limit"] ||= DEFAULT_MEM_LIMIT
 
+  service["links"] = service.delete('depends_on')
+  
   if service_name == "app"
     service["command"] = detect_command(service)
 
