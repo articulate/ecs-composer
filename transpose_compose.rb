@@ -13,7 +13,7 @@ def detect_command(service)
   "./pr-start.sh #{command}"
 end
 
-compose = YAML.load_file('./data/docker-compose.yml')
+compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, service|
   service.delete("labels")
 
