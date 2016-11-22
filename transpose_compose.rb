@@ -10,7 +10,7 @@ def detect_command(service)
   command = service["command"]
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
 
-  "./pr-start.sh #{command}"
+  "./pr-prepare.sh #{command}"
 end
 
 compose = YAML.load_file('docker-compose.yml')
@@ -32,4 +32,4 @@ compose["services"].each do |service_name, service|
   compose["services"][service_name] = service
 end
 
-puts compose.to_yaml
+File.open('docker-compose-ecs.yml', 'w') {|f| f.write compose.to_yaml }
