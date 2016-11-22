@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 require 'yaml'
 
-DEFAULT_MEM_LIMIT = "256000000"
+DEFAULT_MEM_LIMIT = 256000000
 
 image_name = ARGV[0]
 build_name = ARGV[1]
