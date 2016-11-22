@@ -10,7 +10,7 @@ def detect_command(service)
   command = service["command"]
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
 
-  "bash -c \"make pr-prepare && #{command}\""
+  "bash -c \"make pr-prepare ; #{command}\""
 end
 
 compose = YAML.load_file('docker-compose.yml')
@@ -21,7 +21,7 @@ compose["services"].each do |service_name, service|
   service["mem_limit"] ||= DEFAULT_MEM_LIMIT
 
   service["links"] = service.delete('depends_on')
-  
+
   if service_name == "app"
     service["command"] = detect_command(service)
 
