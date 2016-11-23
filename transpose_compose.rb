@@ -25,6 +25,7 @@ compose["services"].each do |service_name, service|
   if service_name == "app"
     service["command"] = detect_command(service)
 
+    service["environment"] ||= []
     service["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
     service["environment"] << "SERVICE_3000_CHECK_TCP=true"
     service["environment"] << "SERVICE_3000_NAME=#{build_name}"
