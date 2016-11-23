@@ -10,7 +10,7 @@ def detect_command(service)
   command = service["command"]
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
 
-  "bash -c \"make pr-prepare ; #{command}\""
+  ["bash", "-c", "make pr-prepare ; #{command}"]
 end
 
 compose = YAML.load_file('docker-compose.yml')
