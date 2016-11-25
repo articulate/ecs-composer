@@ -6,6 +6,8 @@
 export {{.Key | toUpper}}="{{.Value}}"
 {{end -}}
 #pr envs
+{{if keyExists (printf "apps/%s/%s/env_vars" $appname $buildname ) }}
 {{range ls (printf "apps/%s/%s/env_vars" $appname $buildname ) -}}
 export {{.Key | toUpper}}="{{.Value}}"
 {{end -}}
+{{end}}
