@@ -34,8 +34,8 @@ compose["services"].each do |service_name, service|
 
     # Env Config
     service["environment"] << "VAULT_ADDR=http://vault.priv"
-    service["environment"] << "CONSUL_ADDR=http://consul.priv:8500"
-    service["environment"] << "PEER_CONSUL_ADDR=http://consul.peer.articulate.zone:8500"
+    service["environment"] << "CONSUL_ADDR=consul.priv:8500"
+    service["environment"] << "PEER_CONSUL_ADDR=consul.peer.articulate.zone:8500"
   end
 
   compose["services"][service_name] = service
