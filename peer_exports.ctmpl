@@ -1,0 +1,11 @@
+#!/bin/bash
+{{$buildname := env "BUILD_NAME" -}}
+{{$appname := env "APP_NAME" -}}
+#app envs
+{{range ls (printf "apps/%s/global/env_vars" $appname ) -}}
+export {{.Key | toUpper}}="{{.Value}}"
+{{end -}}
+#pr envs
+{{range ls (printf "apps/%s/%s/env_vars" $appname, $buildname ) -}}
+export {{.Key | toUpper}}="{{.Value}}"
+{{end -}}
