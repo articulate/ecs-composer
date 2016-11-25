@@ -30,6 +30,7 @@ compose["services"].each do |service_name, service|
     service["environment"] << "SERVICE_3000_CHECK_TCP=true"
     service["environment"] << "SERVICE_3000_NAME=#{build_name}"
     service["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.articulate.zone/"
+    service["environment"] << "BUILD_NAME=#{build_name}"
   end
 
   compose["services"][service_name] = service
