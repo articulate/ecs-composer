@@ -5,9 +5,9 @@
 {{range ls (printf "apps/%s/global/env_vars" $appname ) -}}
 export {{.Key | toUpper}}="{{.Value}}"
 {{end -}}
-#pr envs
-{{if keyExists (printf "apps/%s/%s/env_vars" $appname $buildname ) }}
-{{range ls (printf "apps/%s/%s/env_vars" $appname $buildname ) -}}
-export {{.Key | toUpper}}="{{.Value}}"
-{{end -}}
-{{end}}
+#pr envs (requires consul-template 1.18+
+# {{if keyExists (printf "apps/%s/%s/env_vars" $appname $buildname ) }}
+# {{range ls (printf "apps/%s/%s/env_vars" $appname $buildname ) -}}
+# export {{.Key | toUpper}}="{{.Value}}"
+# {{end -}}
+# {{end}}
