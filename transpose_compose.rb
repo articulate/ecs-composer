@@ -13,6 +13,8 @@ def detect_command(service)
   ["bash", "-c", "make pr-prepare ; #{command}"]
 end
 
+app_config = YAML.load_file('.app.yml').peer if File.exists?('.app.yml')
+
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, service|
   service.delete("labels")
@@ -20,12 +22,14 @@ compose["services"].each do |service_name, service|
   service["image"] = image_name if service.delete("build")
   service["mem_limit"] ||= DEFAULT_MEM_LIMIT
 
-  service["links"] = service.delete('depends_on')
+  service["links"] ||= []
+  service["links"].concat service.delete('depends_on')
 
   if service_name == "app"
     service["command"] = detect_command(service)
 
     service["environment"] ||= []
+
     # Fabio Config
     service["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
     service["environment"] << "SERVICE_3000_CHECK_TCP=true"
@@ -36,6 +40,9 @@ compose["services"].each do |service_name, service|
     service["environment"] << "VAULT_ADDR=http://vault.priv"
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
     service["environment"] << "PEER_CONSUL_ADDR=consul.peer.articulate.zone:8500"
+
+    # local app config
+    service["environment"].concat app_config.fetch("env", [])
   end
 
   compose["services"][service_name] = service
