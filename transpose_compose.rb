@@ -7,10 +7,10 @@ image_name = ARGV[0]
 build_name = ARGV[1]
 
 logging = {
-  driver: "syslog",
-  options: {
+  "driver" => "syslog",
+  "options" => {
     "syslog-address" => "udp://rsyslog.priv:514",
-    tag: "peer-#{build_name}"
+    "tag": "peer-#{build_name}"
   }
 }
 
