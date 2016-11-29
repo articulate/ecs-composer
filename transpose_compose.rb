@@ -6,6 +6,14 @@ DEFAULT_MEM_LIMIT = '256m'
 image_name = ARGV[0]
 build_name = ARGV[1]
 
+logging = {
+  driver: "syslog",
+  options: {
+    "syslog-address" => "udp://rsyslog.priv:514",
+    tag: "peer-#{build_name}"
+  }
+}
+
 def detect_command(service)
   command = service["command"]
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
@@ -43,6 +51,7 @@ compose["services"].each do |service_name, service|
 
     # local app config
     service["environment"].concat app_config.fetch("env", [])
+    service["logging"] = logging
   end
 
   compose["services"][service_name] = service
