@@ -24,7 +24,7 @@ end
 
 def detect_entrypoint(service, container_name)
   entrypoint = service['entrypoint']
-  entrypoint ||= `docker inspect #{container_name} | jq -r ".[0].Config.Entrypoint[0] | .[]"`.strip.split("\n")
+  entrypoint ||= `docker inspect #{container_name} | jq -r ".[0].Config.Entrypoint[]"`.strip.split("\n")
   entrypoint ||= []
 
   entrypoint << "./local-env.sh"
