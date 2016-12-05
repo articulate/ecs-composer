@@ -22,9 +22,9 @@ def detect_command(service)
   ["bash", "-c", "make pr-prepare ; #{command}"]
 end
 
-def detect_entrypoint(service)
+def detect_entrypoint(service, container_name)
   entrypoint = service['entrypoint']
-  entrypoint ||= `docker inspect #{app_container_name} | jq -r ".[0].Config.Entrypoint[0] | .[]"`.strip.split("\n")
+  entrypoint ||= `docker inspect #{container_name} | jq -r ".[0].Config.Entrypoint[0] | .[]"`.strip.split("\n")
   entrypoint ||= []
 
   entrypoint << "./local-env.sh"
@@ -58,7 +58,7 @@ compose["services"].each do |service_name, service|
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
 
     # local app config
-    service["entrypoint"] = detect_entrypoint(service)
+    service["entrypoint"] = detect_entrypoint(service, app_container_name)
     service["logging"] = logging
   end
 
