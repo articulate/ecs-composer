@@ -58,7 +58,7 @@ compose["services"].each do |service_name, service|
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
 
     # local app config
-    service["entrypoint"] = detect_entrypoint
+    service["entrypoint"] = detect_entrypoint(service)
     service["logging"] = logging
   end
 
