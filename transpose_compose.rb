@@ -5,6 +5,7 @@ DEFAULT_MEM_LIMIT = '256m'
 
 image_name = ARGV[0]
 build_name = ARGV[1]
+app_container_name = ARGV[2]
 
 logging = {
   "driver" => "syslog",
@@ -19,6 +20,14 @@ def detect_command(service)
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
 
   ["bash", "-c", "make pr-prepare ; #{command}"]
+end
+
+def detect_entrypoint(service)
+  entrypoint = service['entrypoint']
+  entrypoint ||= `docker inspect #{app_container_name} | jq -r ".[0].Config.Entrypoint[0] | .[]"`.strip.split("\n")
+  entrypoint ||= []
+
+  entrypoint << "./local-env.sh"
 end
 
 app_config = YAML.load_file('.app.yml')["peer"] if File.exists?('.app.yml')
@@ -47,10 +56,9 @@ compose["services"].each do |service_name, service|
     # Env Config
     service["environment"] << "VAULT_ADDR=http://vault.priv"
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
-    service["environment"] << "PEER_CONSUL_ADDR=consul.peer.articulate.zone"
 
     # local app config
-    service["environment"].concat app_config.fetch("env", [])
+    service["entrypoint"] = detect_entrypoint
     service["logging"] = logging
   end
 
