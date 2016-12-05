@@ -30,8 +30,6 @@ def detect_entrypoint(service, container_name)
   entrypoint << "./local-env.sh"
 end
 
-app_config = YAML.load_file('.app.yml')["peer"] if File.exists?('.app.yml')
-
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, service|
   service.delete("labels")
