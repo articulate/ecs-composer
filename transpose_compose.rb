@@ -49,14 +49,25 @@ compose["services"].each do |service_name, service|
     service["environment"] << "SERVICE_3000_NAME=#{build_name}"
     service["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.articulate.zone/"
 
-    # Env Config
+    # Consul/Vault Config
     service["environment"] << "VAULT_ADDR=http://vault.priv"
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
-
-    # local app config
-    service["environment"].concat peer_config.fetch("env", [])
+    
+    # logging
     service["logging"] = logging
   end
+
+  # Local Service Env    
+  local_env = if peer_config["env_mapping"]
+    local_env_key = peer_config["env_mapping"][service_name]
+    peer_config.fetch(local_env_key, [])
+  else if service_name == "app"
+    peer_config.fetch("env", [])
+  else
+    []
+  end
+
+  service["environment"].concat local_env
 
   compose["services"][service_name] = service
 end
