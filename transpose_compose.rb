@@ -5,7 +5,6 @@ DEFAULT_MEM_LIMIT = '256m'
 
 image_name = ARGV[0]
 build_name = ARGV[1]
-app_container_name = ARGV[2]
 
 logging = {
   "driver" => "syslog",
@@ -20,14 +19,6 @@ def detect_command(service)
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
 
   ["bash", "-c", "make pr-prepare ; #{command}"]
-end
-
-def detect_entrypoint(service, container_name)
-  entrypoint = service['entrypoint']
-  entrypoint ||= `docker inspect #{container_name} | jq -r ".[0].Config.Entrypoint[]"`.strip.split("\n")
-  entrypoint ||= []
-
-  entrypoint << "./local-env.sh"
 end
 
 compose = YAML.load_file('docker-compose.yml')
@@ -56,7 +47,6 @@ compose["services"].each do |service_name, service|
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
 
     # local app config
-    service["entrypoint"] = detect_entrypoint(service, app_container_name)
     service["logging"] = logging
   end
 
