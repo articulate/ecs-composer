@@ -30,8 +30,8 @@ compose["services"].each do |service_name, service|
   service["image"] = image_name if service.delete("build")
   service["mem_limit"] ||= DEFAULT_MEM_LIMIT
 
-  # service["links"] ||= []
-  service["links"] = service.delete('depends_on')
+  service["links"] ||= []
+  service["links"] << service.delete('depends_on')
 
   if service_name == "app"
     service["command"] = detect_command(service)
@@ -47,7 +47,6 @@ compose["services"].each do |service_name, service|
     # Env Config
     service["environment"] << "VAULT_ADDR=http://vault.priv"
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
-    service["environment"] << "PEER_CONSUL_ADDR=consul.peer.articulate.zone"
 
     # local app config
     service["environment"].concat app_config.fetch("env", [])
