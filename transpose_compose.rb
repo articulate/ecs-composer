@@ -30,8 +30,9 @@ compose["services"].each do |service_name, service|
   service["image"] = image_name if service.delete("build")
   service["mem_limit"] ||= DEFAULT_MEM_LIMIT
 
+  dependant = service.delete('depends_on')
   service["links"] ||= []
-  service["links"].concat service.delete('depends_on')
+  service["links"].concat dependant if dependant
 
   if service_name == "app"
     service["command"] = detect_command(service)
