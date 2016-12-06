@@ -21,6 +21,8 @@ def detect_command(service)
   ["bash", "-c", "make pr-prepare ; #{command}"]
 end
 
+app_config = YAML.load_file('.app.yml')["peer"] if File.exists?('.app.yml')
+
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, service|
   service.delete("labels")
@@ -45,8 +47,10 @@ compose["services"].each do |service_name, service|
     # Env Config
     service["environment"] << "VAULT_ADDR=http://vault.priv"
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
+    service["environment"] << "PEER_CONSUL_ADDR=consul.peer.articulate.zone"
 
     # local app config
+    service["environment"].concat app_config.fetch("env", [])
     service["logging"] = logging
   end
 
