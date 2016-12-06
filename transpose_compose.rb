@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 require 'json'
+require 'yaml'
 
 DEFAULT_MEM_LIMIT = '256m'
 
