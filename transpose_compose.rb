@@ -61,7 +61,7 @@ compose["services"].each do |service_name, service|
   if peer_config["env_mapping"]
     local_env_key = peer_config["env_mapping"][service_name]
     service["environment"].concat peer_config.fetch(local_env_key, [])
-  else if service_name == "app"
+  elsif service_name == "app"
     service["environment"].concat peer_config.fetch("env", [])
   end
 
