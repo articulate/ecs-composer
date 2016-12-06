@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require 'yaml'
+require 'json'
 
 DEFAULT_MEM_LIMIT = '256m'
 
@@ -21,7 +21,10 @@ def detect_command(service)
   ["bash", "-c", "make pr-prepare ; #{command}"]
 end
 
-app_config = YAML.load_file('.app.yml')["peer"] if File.exists?('.app.yml')
+if File.exists?('.app.json')
+  app_config = File.read('.app.json')
+  peer_config = JSON.parse(app_config)["peer"] || {}
+end
 
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, service|
@@ -50,7 +53,7 @@ compose["services"].each do |service_name, service|
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
 
     # local app config
-    service["environment"].concat app_config.fetch("env", [])
+    service["environment"].concat peer_config.fetch("env", [])
     service["logging"] = logging
   end
 
