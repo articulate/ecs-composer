@@ -38,10 +38,10 @@ compose["services"].each do |service_name, service|
   service["links"] ||= []
   service["links"].concat dependant if dependant
 
+  service["environment"] ||= []
+  
   if service_name == "app"
     service["command"] = detect_command(service)
-
-    service["environment"] ||= []
 
     # Fabio Config
     service["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
