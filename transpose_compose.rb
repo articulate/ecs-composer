@@ -7,14 +7,6 @@ DEFAULT_MEM_LIMIT = '256m'
 image_name = ARGV[0]
 build_name = ARGV[1]
 
-logging = {
-  "driver" => "syslog",
-  "options" => {
-    "syslog-address" => "udp://rsyslog.priv:514",
-    "tag" => "peer-#{build_name}"
-  }
-}
-
 def detect_command(service)
   command = service["command"]
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
@@ -29,6 +21,15 @@ end
 
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, service|
+  # logging
+  service["logging"] = {
+    "driver" => "syslog",
+    "options" => {
+      "syslog-address" => "udp://rsyslog.priv:514",
+      "tag" => "peer-#{build_name}-#{service_name}"
+    }
+  }
+  
   service.delete("labels")
 
   service["image"] = image_name if service.delete("build")
@@ -52,9 +53,6 @@ compose["services"].each do |service_name, service|
     # Consul/Vault Config
     service["environment"] << "VAULT_ADDR=http://vault.priv"
     service["environment"] << "CONSUL_ADDR=consul.priv:8500"
-    
-    # logging
-    service["logging"] = logging
   end
 
   # Local Service Env    
