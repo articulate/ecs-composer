@@ -41,6 +41,10 @@ compose["services"].each do |service_name, service|
 
   service["environment"] ||= []
   
+  # Consul/Vault Config
+  service["environment"] << "VAULT_ADDR=http://vault.priv"
+  service["environment"] << "CONSUL_ADDR=consul.priv:8500"
+
   if service_name == "app"
     service["command"] = detect_command(service)
 
@@ -49,10 +53,6 @@ compose["services"].each do |service_name, service|
     service["environment"] << "SERVICE_3000_CHECK_TCP=true"
     service["environment"] << "SERVICE_3000_NAME=#{build_name}"
     service["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.articulate.zone/"
-
-    # Consul/Vault Config
-    service["environment"] << "VAULT_ADDR=http://vault.priv"
-    service["environment"] << "CONSUL_ADDR=consul.priv:8500"
   end
 
   # Local Service Env    
