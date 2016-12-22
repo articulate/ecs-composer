@@ -34,6 +34,10 @@ compose["services"].each do |service_name, service|
   service.delete("labels")
 
   image = service.fetch("image", "")
+  
+  puts "IMAGE: #{image}"
+  puts "ENDS: #{image.end_with? "#{app_name}_app"}"
+  
   service["image"] = image_name if service.delete("build")
   service["image"] = image_name if image.end_with? "#{app_name}_app"
 
