@@ -6,7 +6,7 @@ DEFAULT_MEM_LIMIT = '256m'
 
 image_name = ARGV[0]
 build_name = ARGV[1]
-app_name = build_name.split('-')[0...-1]
+app_name = build_name.split('-')[0...-1].join("")
 
 def detect_command(service)
   command = service["command"]
