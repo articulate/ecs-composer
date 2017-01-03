@@ -15,8 +15,8 @@ def detect_command(service)
   ["bash", "-c", "make pr-prepare ; #{command}"]
 end
 
-if File.exists?('.app.json')
-  app_config = File.read('.app.json')
+if File.exists?('service.json')
+  app_config = File.read('service.json')
   peer_config = JSON.parse(app_config)["peer"] || {}
 end
 
