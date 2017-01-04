@@ -6,7 +6,7 @@ DEFAULT_MEM_LIMIT = '256m'
 
 image_name = ARGV[0]
 build_name = ARGV[1]
-app_name = build_name.split('-')[0...-1].join("")
+app_name = build_name.split('-')[0...-1].join("-")
 
 def detect_command(service)
   command = service["command"]
@@ -35,7 +35,7 @@ compose["services"].each do |service_name, service|
 
   image = service.fetch("image", "")
   service["image"] = image_name if service.delete("build")
-  service["image"] = image_name if image == "#{app_name}_app"
+  service["image"] = image_name if image == "#{app_name.gsub("-", "")}_app"
 
   service["mem_limit"] ||= DEFAULT_MEM_LIMIT
 
