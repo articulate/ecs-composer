@@ -46,6 +46,8 @@ compose["services"].each do |service_name, service|
   service["environment"] ||= []
   
   # Consul/Vault Config
+  service["environment"] << "APP_NAME=#{app_name}"
+  service["environment"] << "APP_ENV=peer-#{build_name}"
   service["environment"] << "VAULT_ADDR=http://vault.priv"
   service["environment"] << "CONSUL_ADDR=consul.priv:8500"
 
