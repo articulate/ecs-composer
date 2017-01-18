@@ -18,9 +18,16 @@ end
 if File.exists?('service.json')
   app_config = File.read('service.json')
   peer_config = JSON.parse(app_config)["peer"] || {}
+else
+  raise "No service.json file detected"
 end
 
 compose = YAML.load_file('docker-compose.yml')
+
+## Add datadog to each service
+compose["services"]["datadog"] ||= JSON.parse(File.read("datadog.json"))
+compose["services"]["datadog"]["environment"] << peer_config["env"].find {|var| var.start_with? "ENCRYPTED_VAULT_TOKEN" }
+
 compose["services"].each do |service_name, service|
   # logging
   service["logging"] = {
@@ -30,7 +37,7 @@ compose["services"].each do |service_name, service|
       "tag" => "peer-#{build_name}-#{service_name}"
     }
   }
-  
+
   service.delete("labels")
 
   image = service.fetch("image", "")
@@ -44,7 +51,7 @@ compose["services"].each do |service_name, service|
   service["links"].concat dependant if dependant
 
   service["environment"] ||= []
-  
+
   # Consul/Vault Config
   service["environment"] << "APP_NAME=#{app_name}"
   service["environment"] << "APP_ENV=peer-#{build_name}"
@@ -61,7 +68,7 @@ compose["services"].each do |service_name, service|
     service["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.articulate.zone/"
   end
 
-  # Local Service Env    
+  # Local Service Env
   if peer_config["env_mapping"]
     local_env_key = peer_config["env_mapping"][service_name]
     service["environment"].concat peer_config.fetch(local_env_key, [])

@@ -1,0 +1,29 @@
+{
+  "name": "datadog",
+  "image": "articulate/articulate-dd-agent:latest",
+  "memory": 256,
+  "privileged": true,
+  "essential": false,
+  "environment": [
+    {
+      "name": "EC2_TAGS",
+      "value": "yes"
+    }
+  ],
+  "mountPoints": [
+    {
+      "sourceVolume": "sock",
+      "containerPath": "/var/run/docker.sock"
+    },
+    {
+      "sourceVolume": "proc",
+      "containerPath": "/host/proc",
+      "readOnly": true
+    },
+    {
+      "sourceVolume": "cgroup",
+      "containerPath": "/host/sys/fs/cgroup",
+      "readOnly": true
+    }
+  ]
+}
