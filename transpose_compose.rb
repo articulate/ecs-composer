@@ -23,12 +23,6 @@ else
 end
 
 compose = YAML.load_file('docker-compose.yml')
-
-## Add datadog to each service
-datadog = YAML.load_file("datadog.yml")
-datadog["environment"] << peer_config["env"].find {|var| var.start_with? "ENCRYPTED_VAULT_TOKEN" }
-compose["services"]["datadog"] = datadog
-
 compose["services"].each do |service_name, service|
   # logging
   service["logging"] = {
