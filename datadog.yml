@@ -1,0 +1,11 @@
+datadog:
+  image: articulate/articulate-dd-agent:latest
+  memory: 256m
+  privileged: true
+  environment:
+    - "EC2_TAGS=yes"
+  volumes:
+    - "sock:/var/run/docker.sock"
+    - "proc:/host/proc:ro"
+    - "cgroup:/host/sys/fs/cgroup:ro"
+  

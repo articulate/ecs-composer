@@ -25,8 +25,9 @@ end
 compose = YAML.load_file('docker-compose.yml')
 
 ## Add datadog to each service
-compose["services"]["datadog"] ||= JSON.parse(File.read("datadog.json"))
-compose["services"]["datadog"]["environment"] << peer_config["env"].find {|var| var.start_with? "ENCRYPTED_VAULT_TOKEN" }
+datadog = YAML.load_file("datadog.yml")
+datadog["environment"] << peer_config["env"].find {|var| var.start_with? "ENCRYPTED_VAULT_TOKEN" }
+compose["services"]["datadog"] = datadog
 
 compose["services"].each do |service_name, service|
   # logging
