@@ -52,6 +52,7 @@ compose["services"].each do |service_name, service|
   service["environment"] << "APP_ENV=peer-#{build_name}"
   service["environment"] << "VAULT_ADDR=http://vault.priv"
   service["environment"] << "CONSUL_ADDR=consul.priv:8500"
+  service["environment"] << "SYSTEM_URL=#{build_name}.peer.articulate.zone"
 
   if service_name == "app"
     service["command"] = detect_command(service)
