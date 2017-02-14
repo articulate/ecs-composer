@@ -72,6 +72,15 @@ compose["services"].each do |service_name, service|
     service["environment"].concat peer_config.fetch("env", [])
   end
 
+  # Volume mounting
+  service["volumes"] ||= []
+
+  if peer_config["volumes"] && peer_config["volumes"][service_name]
+    peer_config["volumes"][service_name].each do |container_path|
+      service["volumes"] << "/var/peer-storage/#{build_name}/#{service_name}:#{container_path}"
+    end
+  end
+
   compose["services"][service_name] = service
 end
 
