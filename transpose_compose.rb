@@ -12,7 +12,7 @@ def detect_command(service)
   command = service["command"]
   command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
 
-  ["bash", "-c", "make pr-prepare && #{command}"]
+  ["bash", "-c", "sleep 5 && make pr-prepare && #{command}"]
 end
 
 if File.exists?('service.json')
