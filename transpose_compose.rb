@@ -1,18 +1,158 @@
 #!/usr/bin/ruby
 require 'json'
 require 'yaml'
+require 'ostruct'
 
-DEFAULT_MEM_LIMIT = '256m'
+class Service
+  DEFAULT_MEM_LIMIT = '256m'
+  APP_DB_SLEEP = 5
+  OTHER_DB_SLEEP = 30
 
-image_name = ARGV[0]
-build_name = ARGV[1]
-app_name = build_name.split('-')[0...-1].join("-")
+  attr_reader :image_name, :build_name, :app_name
 
-def detect_command(service)
-  command = service["command"]
-  command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip
+  def initialize(name, defn)
+    @name = name
+    @defn = defn
 
-  ["bash", "-c", "sleep 5 && make pr-prepare && #{command}"]
+    @image_name = ARGV[0]
+    @build_name = ARGV[1]
+    @app_name = @build_name.split('-')[0...-1].join("-")
+
+    # A few required things
+    @defn["environment"] ||= []
+    @defn["links"] ||= []
+    @defn["volumes"] ||= []
+  end
+
+  def setup_env(config)
+    if config["env_mapping"]
+      local_env_key = config["env_mapping"][@name]
+      @defn["environment"].concat config.fetch(local_env_key, [])
+    elsif is_app?
+      @defn["environment"].concat config.fetch("env", [])
+    end
+  end
+
+  def mount_volumes(config)
+    if config["volumes"] && config["volumes"][@name]
+      config["volumes"][@name].each do |container_path|
+        @defn["volumes"] << "/var/peer-storage/#{build_name}/#{@name}:#{container_path}"
+      end
+    end
+  end
+
+  def serialize!
+    add_logging
+    delete_labels
+    ensure_mem_limit
+    ensure_image
+    convert_links
+    add_peer_env
+
+    build_command do
+      prepare_system if is_app?
+      delay_for_database if db_required?
+    end
+
+    @defn
+  end
+
+  def base_command
+    @command = service["command"]
+    @command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip if is_app?
+  end
+
+  def db_required?
+    links.include? "db"
+  end
+
+  def is_app?
+    @name == "app"
+  end
+
+  def reuse_app_image?
+    @defn['image'] == "#{app_name.gsub("-", "")}_app"
+  end
+
+  private
+
+  def links
+    @defn['links']
+  end
+
+  def sleep_time
+    is_app? ? APP_DB_SLEEP : OTHER_DB_SLEEP
+  end
+
+  def add_logging
+    @defn['logger'] = {
+      "driver" => "syslog",
+      "options" => {
+        "syslog-address" => "udp://rsyslog.priv:514",
+        "tag" => "peer-#{build_name}-#{@name}"
+      }
+    }
+  end
+
+  def delete_labels
+    @defn.delete("labels")
+  end
+
+  def ensure_mem_limit
+    @defn["mem_limit"] ||= DEFAULT_MEM_LIMIT
+  end
+
+  def ensure_image
+    image = @defn.fetch("image", "")
+    @defn["image"] = image_name if @defn.delete("build")
+    @defn["image"] = image_name if reuse_app_image?
+  end
+
+  def convert_links
+    dependant = @defn.delete('depends_on')
+    @defn["links"].concat dependant if dependant
+  end
+
+  def add_peer_env
+    @defn["environment"] << "APP_NAME=#{app_name}"
+    @defn["environment"] << "APP_ENV=peer-#{build_name}"
+    @defn["environment"] << "VAULT_ADDR=http://vault.priv"
+    @defn["environment"] << "CONSUL_ADDR=consul.priv:8500"
+    @defn["environment"] << "SYSTEM_URL=#{build_name}.peer.articulate.zone"
+
+    if is_app?
+      @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
+      @defn["environment"] << "SERVICE_3000_CHECK_TCP=true"
+      @defn["environment"] << "SERVICE_3000_NAME=#{build_name}"
+      @defn["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.articulate.zone/"
+    end
+  end
+
+  def delay_for_database
+    @command.unshift "sleep #{sleep_time}"
+  end
+
+  def prepare_system
+    @command.unshift "make pr-prepare"
+  end
+
+  def build_command
+    command = @defn["command"]
+
+    # use the Dockerfile command if we're the app and nothing is yet specified
+    command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip if is_app?
+
+    if !command.nil?
+      @command = Array(command)
+      yield
+      @command = ["bash", "-c", @command.join(" && ")]
+      @defn['command'] = @command
+    else
+      # No command modification
+      true
+    end
+  end
+
 end
 
 if File.exists?('service.json')
@@ -23,65 +163,13 @@ else
 end
 
 compose = YAML.load_file('docker-compose.yml')
-compose["services"].each do |service_name, service|
-  # logging
-  service["logging"] = {
-    "driver" => "syslog",
-    "options" => {
-      "syslog-address" => "udp://rsyslog.priv:514",
-      "tag" => "peer-#{build_name}-#{service_name}"
-    }
-  }
+compose["services"].each do |service_name, details|
+  service = Service.new(service_name, details)
 
-  service.delete("labels")
+  service.setup_env(peer_config)
+  service.mount_volumes(peer_config)
 
-  image = service.fetch("image", "")
-  service["image"] = image_name if service.delete("build")
-  service["image"] = image_name if image == "#{app_name.gsub("-", "")}_app"
-
-  service["mem_limit"] ||= DEFAULT_MEM_LIMIT
-
-  dependant = service.delete('depends_on')
-  service["links"] ||= []
-  service["links"].concat dependant if dependant
-
-  service["environment"] ||= []
-
-  # Consul/Vault Config
-  service["environment"] << "APP_NAME=#{app_name}"
-  service["environment"] << "APP_ENV=peer-#{build_name}"
-  service["environment"] << "VAULT_ADDR=http://vault.priv"
-  service["environment"] << "CONSUL_ADDR=consul.priv:8500"
-  service["environment"] << "SYSTEM_URL=#{build_name}.peer.articulate.zone"
-
-  if service_name == "app"
-    service["command"] = detect_command(service)
-
-    # Fabio Config
-    service["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
-    service["environment"] << "SERVICE_3000_CHECK_TCP=true"
-    service["environment"] << "SERVICE_3000_NAME=#{build_name}"
-    service["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.articulate.zone/"
-  end
-
-  # Local Service Env
-  if peer_config["env_mapping"]
-    local_env_key = peer_config["env_mapping"][service_name]
-    service["environment"].concat peer_config.fetch(local_env_key, [])
-  elsif service_name == "app"
-    service["environment"].concat peer_config.fetch("env", [])
-  end
-
-  # Volume mounting
-  service["volumes"] ||= []
-
-  if peer_config["volumes"] && peer_config["volumes"][service_name]
-    peer_config["volumes"][service_name].each do |container_path|
-      service["volumes"] << "/var/peer-storage/#{build_name}/#{service_name}:#{container_path}"
-    end
-  end
-
-  compose["services"][service_name] = service
+  compose["services"][service_name] = service.serialize!
 end
 
 File.open('docker-compose-ecs.yml', 'w') {|f| f.write compose.to_yaml }
