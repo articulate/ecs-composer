@@ -5,8 +5,8 @@ require 'ostruct'
 
 class Service
   DEFAULT_MEM_LIMIT = '256m'
-  APP_DB_SLEEP = 30
-  OTHER_DB_SLEEP = 75
+  APP_DB_SLEEP = 60
+  OTHER_DB_SLEEP = 90
 
   attr_reader :image_name, :build_name, :app_name
 
