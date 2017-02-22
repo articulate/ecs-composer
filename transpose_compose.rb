@@ -85,7 +85,7 @@ class Service
   end
 
   def add_logging
-    @defn['logger'] = {
+    @defn['logging'] = {
       "driver" => "syslog",
       "options" => {
         "syslog-address" => "udp://rsyslog.priv:514",
