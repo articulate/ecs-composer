@@ -3,6 +3,7 @@ require 'json'
 require 'yaml'
 require 'ostruct'
 
+# Encapsulates each service block in a compose file
 class Service
   DEFAULT_MEM_LIMIT = '256m'
   APP_DB_SLEEP = 10
