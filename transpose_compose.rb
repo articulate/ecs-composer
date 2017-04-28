@@ -62,7 +62,14 @@ class Service
   end
 
   def db_required?
-    links.include? "db" || links.include? "postgres" || links.include? "postgresql" || links.include? "redis" || links.include? "elasticsearch" || links.include? "memcache" || links.include? "memcached"
+    links.include?("db") ||
+      links.include?("postgres") ||
+      links.include?("postgresql") ||
+      links.include?("redis") ||
+      links.include?("elasticsearch") ||
+      links.include?("memcache") ||
+      links.include?("memcached") ||
+      links.include?("cache")
   end
 
   def is_app?
