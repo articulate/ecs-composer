@@ -6,8 +6,6 @@ require 'ostruct'
 # Encapsulates each service block in a compose file
 class Service
   DEFAULT_MEM_LIMIT = '256m'
-  APP_DB_SLEEP = 10
-  OTHER_DB_SLEEP = 90
 
   attr_reader :image_name, :build_name, :app_name
 
@@ -64,7 +62,7 @@ class Service
   end
 
   def db_required?
-    links.include? "db"
+    links.include? "db" || links.include? "postgres" || links.include? "postgresql" || links.include? "redis" || links.include? "elasticsearch" || links.include? "memcache" || links.include? "memcached"
   end
 
   def is_app?
@@ -79,10 +77,6 @@ class Service
 
   def links
     @defn['links']
-  end
-
-  def sleep_time
-    is_app? ? APP_DB_SLEEP : OTHER_DB_SLEEP
   end
 
   def add_logging
@@ -130,11 +124,11 @@ class Service
   end
 
   def delay_for_database
-    @command.unshift "sleep #{sleep_time}"
+    @command.unshift "make peer-wait-for-it"
   end
 
   def prepare_system
-    @command.unshift "make pr-prepare"
+    @command.unshift "make peer-prepare"
   end
 
   def build_command
