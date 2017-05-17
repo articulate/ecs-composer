@@ -5,7 +5,7 @@ require 'ostruct'
 
 # Encapsulates each service block in a compose file
 class Service
-  DEFAULT_MEM_LIMIT = '256m'
+  DEFAULT_MEM_RESERVATION = '64m'
 
   attr_reader :image_name, :build_name, :app_name
 
@@ -43,7 +43,7 @@ class Service
   def serialize!
     add_logging
     delete_labels
-    ensure_mem_limit
+    ensure_mem_reservation
     ensure_image
     convert_links
     add_peer_env
@@ -100,8 +100,9 @@ class Service
     @defn.delete("labels")
   end
 
-  def ensure_mem_limit
-    @defn["mem_limit"] ||= DEFAULT_MEM_LIMIT
+  def ensure_mem_reservation
+    @defn["mem_reservation"] = @defn.delete("mem_limit")
+    @defn["mem_reservation"] ||= DEFAULT_MEM_RESERVATION
   end
 
   def ensure_image
