@@ -43,7 +43,7 @@ class Service
   def serialize!
     add_logging
     delete_labels
-    ensure_mem_reservation
+    ensure_mem_limits
     ensure_image
     convert_links
     add_peer_env
@@ -100,9 +100,10 @@ class Service
     @defn.delete("labels")
   end
 
-  def ensure_mem_reservation
-    @defn["mem_reservation"] = @defn.delete("mem_limit")
-    @defn["mem_reservation"] ||= DEFAULT_MEM_RESERVATION
+  def ensure_mem_limits
+    if @defn["mem_reservation"].nil? && @defn["mem_limit"].nil?
+      @defn["mem_reservation"] ||= DEFAULT_MEM_RESERVATION
+    end
   end
 
   def ensure_image
