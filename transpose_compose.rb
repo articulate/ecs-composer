@@ -90,7 +90,6 @@ class Service
     @defn['logging'] = {
       "driver" => "syslog",
       "options" => {
-        "syslog-address" => "udp://rsyslog.priv:514",
         "tag" => "peer-#{build_name}-#{@name}"
       }
     }
