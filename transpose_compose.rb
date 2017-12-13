@@ -122,7 +122,7 @@ class Service
     @defn["environment"] << "VAULT_ADDR=http://vault.priv"
     @defn["environment"] << "CONSUL_ADDR=consul.priv:8500"
     @defn["environment"] << "SYSTEM_URL=#{build_name}.peer.articulate.zone"
-    @defn["environment"] << "#{config["system_env_name"]}=#{build_name}.peer.articulate.zone" if config["system_env_name"]
+    @defn["environment"] << "#{config["service_env_name"]}=#{build_name}.peer.articulate.zone" if config["service_env_name"]
 
     if is_app?
       @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
