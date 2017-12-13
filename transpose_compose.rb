@@ -40,13 +40,13 @@ class Service
     end
   end
 
-  def serialize!
+  def serialize!(config)
     add_logging
     delete_labels
     ensure_mem_limits
     ensure_image
     convert_links
-    add_peer_env
+    add_peer_env(config)
 
     build_command do
       prepare_system if is_app?
@@ -116,7 +116,7 @@ class Service
     @defn["links"].concat dependant if dependant
   end
 
-  def add_peer_env
+  def add_peer_env(config)
     @defn["environment"] << "APP_NAME=#{app_name}"
     @defn["environment"] << "APP_ENV=peer-#{build_name}"
     @defn["environment"] << "VAULT_ADDR=http://vault.priv"
@@ -173,7 +173,7 @@ compose["services"].each do |service_name, details|
   service.setup_env(peer_config)
   service.mount_volumes(peer_config)
 
-  compose["services"][service_name] = service.serialize!
+  compose["services"][service_name] = service.serialize!(peer_config)
 end
 
 File.open('docker-compose-ecs.yml', 'w') {|f| f.write compose.to_yaml }
