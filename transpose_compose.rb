@@ -117,8 +117,8 @@ class Service
   end
 
   def add_peer_env(config)
-    @defn["environment"] << "APP_NAME=#{app_name}"
-    @defn["environment"] << "APP_ENV=peer-#{build_name}"
+    @defn["environment"] << "SERVICE_NAME=#{app_name}"
+    @defn["environment"] << "SERVICE_ENV=peer-#{build_name}"
     @defn["environment"] << "VAULT_ADDR=http://vault.priv"
     @defn["environment"] << "CONSUL_ADDR=consul.priv:8500"
     @defn["environment"] << "SYSTEM_URL=#{build_name}.peer.articulate.zone"
