@@ -128,7 +128,7 @@ class Service
       @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
       @defn["environment"] << "SERVICE_3000_CHECK_TCP=true"
       @defn["environment"] << "SERVICE_3000_NAME=#{build_name}"
-      @defn["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.*/,urlprefix-/peer/#{build_name}"
+      @defn["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.*/,urlprefix-/#{build_name} opts \"strip=/#{build_name}\""
     end
   end
 
