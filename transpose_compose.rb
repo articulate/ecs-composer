@@ -5,7 +5,7 @@ require 'ostruct'
 
 # Encapsulates each service block in a compose file
 class Service
-  DEFAULT_MEM_RESERVATION = '64m'
+  DEFAULT_MEM_RESERVATION = '256m'
 
   attr_reader :image_name, :build_name, :app_name
 
