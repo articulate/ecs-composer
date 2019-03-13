@@ -47,6 +47,8 @@ class Service
     ensure_image
     convert_links
     add_peer_env(config)
+    setup_env(config)
+    mount_volumes(config)
 
     build_command do
       prepare_system if is_app?
@@ -169,9 +171,6 @@ end
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, details|
   service = Service.new(service_name, details)
-
-  service.setup_env(peer_config)
-  service.mount_volumes(peer_config)
 
   compose["services"][service_name] = service.serialize!(peer_config)
 end
