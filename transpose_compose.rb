@@ -46,8 +46,8 @@ class Service
     ensure_mem_limits
     ensure_image
     convert_links
-    add_peer_env(config)
     setup_env(config)
+    add_peer_env(config)
     mount_volumes(config)
 
     build_command do
@@ -117,7 +117,7 @@ class Service
   end
 
   def add_peer_env(config)
-    @defn["environment"] << "APP_NAME=#{app_name}"
+    @defn["environment"] << "APP_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.include?('APP_NAME') }
     @defn["environment"] << "APP_ENV=peer-#{build_name}"
     @defn["environment"] << "VAULT_ADDR=http://vault.priv"
     @defn["environment"] << "CONSUL_ADDR=consul.priv:8500"
