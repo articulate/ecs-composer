@@ -46,14 +46,14 @@ class Service
     ensure_mem_limits
     ensure_image
     convert_links
+    setup_env(config)
     add_peer_env(config)
+    mount_volumes(config)
 
     build_command do
       prepare_system if is_app?
       delay_for_database if db_required?
     end
-
-    @defn
   end
 
   def base_command
@@ -117,7 +117,7 @@ class Service
   end
 
   def add_peer_env(config)
-    @defn["environment"] << "APP_NAME=#{app_name}"
+    @defn["environment"] << "APP_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.start_with?('APP_NAME=') }
     @defn["environment"] << "APP_ENV=peer-#{build_name}"
     @defn["environment"] << "VAULT_ADDR=http://vault.priv"
     @defn["environment"] << "CONSUL_ADDR=consul.priv:8500"
@@ -168,12 +168,7 @@ end
 
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, details|
-  service = Service.new(service_name, details)
-
-  service.setup_env(peer_config)
-  service.mount_volumes(peer_config)
-
-  compose["services"][service_name] = service.serialize!(peer_config)
+  Service.new(service_name, details).serialize!(peer_config)
 end
 
 File.open('docker-compose-ecs.yml', 'w') {|f| f.write compose.to_yaml }
