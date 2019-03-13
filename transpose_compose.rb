@@ -54,8 +54,6 @@ class Service
       prepare_system if is_app?
       delay_for_database if db_required?
     end
-
-    @defn
   end
 
   def base_command
@@ -170,9 +168,7 @@ end
 
 compose = YAML.load_file('docker-compose.yml')
 compose["services"].each do |service_name, details|
-  service = Service.new(service_name, details)
-
-  compose["services"][service_name] = service.serialize!(peer_config)
+  Service.new(service_name, details).serialize!(peer_config)
 end
 
 File.open('docker-compose-ecs.yml', 'w') {|f| f.write compose.to_yaml }
