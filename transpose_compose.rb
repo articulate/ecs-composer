@@ -115,14 +115,14 @@ class Service
     dependant = @defn.delete('depends_on')
     @defn["links"].concat dependant if dependant
   end
-
+  
   def add_peer_env(config)
     @defn["environment"] << "APP_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.start_with?('APP_NAME=') }
     @defn["environment"] << "APP_ENV=peer-#{build_name}"
-    @defn["environment"] << "VAULT_ADDR=http://vault.priv"
-    @defn["environment"] << "CONSUL_ADDR=consul.priv:8500"
-    @defn["environment"] << "SYSTEM_URL=#{build_name}.peer.articulate.zone"
-    @defn["environment"] << "#{config["service_env_name"]}=https://#{build_name}.peer.articulate.zone" if config["service_env_name"]
+    @defn["environment"] << "VAULT_ADDR=#{vault_address}"
+    @defn["environment"] << "CONSUL_ADDR=#{consul_address}"
+    @defn["environment"] << "SYSTEM_URL=#{service_host}"
+    @defn["environment"] << "#{config["service_env_name"]}=#{service_address}" if config["service_env_name"]
 
     if is_app?
       @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
@@ -156,7 +156,38 @@ class Service
       true
     end
   end
-
+  
+  def product_name
+    ARGV[0] || "legacy"
+  end
+  
+  def consul_address
+    if product_name == "legacy"
+      "http://consul.#{product_name}.stage.art-internal.com"
+    else
+      "https://consul.#{product_name}.stage.art-internal.com"
+    end
+  end
+  
+  def vault_address
+    if product_name == "legacy"
+      "http://vault.#{product_name}.stage.art-internal.com"
+    else
+      "https://vault.#{product_name}.stage.art-internal.com"
+    end
+  end
+  
+  def service_address
+    "https://#{service_host}"
+  end
+  
+  def service_host
+    if product_name == "legacy"
+      "#{build_name}.peer.articulate.zone"
+    else
+      "#{build_name}.peer.rise.engineering"
+    end
+  end
 end
 
 if File.exists?('service.json')
