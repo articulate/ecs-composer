@@ -15,6 +15,7 @@ class Service
 
     @image_name = ARGV[0]
     @build_name = ARGV[1]
+    @product_name = ARGV[2]
     @app_name = @build_name.split('-')[0...-1].join("-")
 
     # A few required things
@@ -158,7 +159,7 @@ class Service
   end
   
   def product_name
-    ARGV[0] || "legacy"
+    @product_name || "legacy"
   end
   
   def consul_address
