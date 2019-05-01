@@ -163,19 +163,19 @@ class Service
   end
   
   def consul_address
-    if product_name == "legacy"
-      "http://consul.#{product_name}.stage.art-internal.com"
-    else
-      "https://consul.#{product_name}.stage.art-internal.com"
-    end
+    "http://consul.#{product_name}.stage.art-internal.com"
   end
   
   def vault_address
     if product_name == "legacy"
-      "http://vault.#{product_name}.stage.art-internal.com"
+      "http://#{vault_host}"
     else
-      "https://vault.#{product_name}.stage.art-internal.com"
+      "https://#{vault_host}"
     end
+  end
+
+  def vault_host
+    "vault.#{product_name}.stage.art-internal.com"
   end
   
   def service_address
