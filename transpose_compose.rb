@@ -15,7 +15,8 @@ class Service
 
     @image_name = ARGV[0]
     @build_name = ARGV[1]
-    @product_name = ARGV[2]
+    @account_name = ARGV[2]
+    @product_name = ARGV[3]
     @app_name = @build_name.split('-')[0...-1].join("-")
 
     # A few required things
@@ -118,8 +119,9 @@ class Service
   end
   
   def add_peer_env(config)
-    @defn["environment"] << "APP_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.start_with?('APP_NAME=') }
-    @defn["environment"] << "APP_ENV=peer-#{build_name}"
+    @defn["environment"] << "SERVICE_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.start_with?('SERVICE_NAME=') }
+    @defn["environment"] << "SERVICE_PRODUCT=#{product_name}" unless @defn["environment"].any? { |e| e.start_with?('SERVICE_PRODUCT=') }
+    @defn["environment"] << "SERVICE_ENV=peer-#{build_name}"
     @defn["environment"] << "VAULT_ADDR=#{vault_address}"
     @defn["environment"] << "CONSUL_ADDR=#{consul_address}"
     @defn["environment"] << "SYSTEM_URL=#{service_host}"
@@ -158,16 +160,20 @@ class Service
     end
   end
   
+  def account_name
+    @account_name || "legacy"
+  end
+  
   def product_name
-    @product_name || "legacy"
+    @product_name || "360"
   end
   
   def consul_address
-    "http://consul.#{product_name}.stage.art-internal.com"
+    "http://consul.#{account_name}.stage.art-internal.com"
   end
   
   def vault_address
-    if product_name == "legacy"
+    if account_name == "legacy"
       "http://#{vault_host}"
     else
       "https://#{vault_host}"
@@ -175,7 +181,7 @@ class Service
   end
 
   def vault_host
-    "vault.#{product_name}.stage.art-internal.com"
+    "vault.#{account_name}.stage.art-internal.com"
   end
   
   def service_address
@@ -183,7 +189,7 @@ class Service
   end
   
   def service_host
-    if product_name == "legacy"
+    if account_name == "legacy"
       "#{build_name}.peer.articulate.zone"
     else
       "#{build_name}.peer.rise.engineering"
