@@ -126,6 +126,7 @@ class Service
     @defn["environment"] << "CONSUL_ADDR=#{consul_address}"
     @defn["environment"] << "SYSTEM_URL=#{service_host}"
     @defn["environment"] << "#{config["service_env_name"]}=#{service_address}" if config["service_env_name"]
+    @defn["environment"] << "#{config["servicehost_env_name"]}=#{service_host}" if config["servicehost_env_name"]
 
     if is_app?
       @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
