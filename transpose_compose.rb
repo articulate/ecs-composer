@@ -193,7 +193,7 @@ class Service
     if account_name == "legacy"
       "#{build_name}.peer.articulate.zone"
     else
-      "#{build_name}.peer.rise.engineering"
+      "#{build_name}.peer.rise.zone"
     end
   end
 end
