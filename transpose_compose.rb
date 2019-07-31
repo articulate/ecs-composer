@@ -125,6 +125,7 @@ class Service
     @defn["environment"] << "VAULT_ADDR=#{vault_address}"
     @defn["environment"] << "CONSUL_ADDR=#{consul_address}"
     @defn["environment"] << "SYSTEM_URL=#{service_host}"
+    @defn["environment"] << "PEER_ID=#{build_name}"
     @defn["environment"] << "#{config["service_env_name"]}=#{service_address}" if config["service_env_name"]
     @defn["environment"] << "#{config["servicehost_env_name"]}=#{service_host}" if config["servicehost_env_name"]
 
