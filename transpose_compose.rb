@@ -18,6 +18,7 @@ class Service
     @account_name = ARGV[2]
     @product_name = ARGV[3]
     @app_name = @build_name.split('-')[0...-1].join("-")
+    @expose_fabio = !(@defn["labels"] || {})["SERVICE_3000_NAME"].nil?
 
     # A few required things
     @defn["environment"] ||= []
@@ -78,6 +79,10 @@ class Service
     @name == "app"
   end
 
+  def expose_fabio?
+    !!@expose_fabio
+  end
+
   def reuse_app_image?
     @defn['image'] == "#{app_name.gsub("-", "")}_app"
   end
@@ -117,7 +122,7 @@ class Service
     dependant = @defn.delete('depends_on')
     @defn["links"].concat dependant if dependant
   end
-  
+
   def add_peer_env(config)
     @defn["environment"] << "APP_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.start_with?('APP_NAME=') }
     @defn["environment"] << "SERVICE_PRODUCT=#{product_name}" unless @defn["environment"].any? { |e| e.start_with?('SERVICE_PRODUCT=') }
@@ -129,11 +134,18 @@ class Service
     @defn["environment"] << "#{config["service_env_name"]}=#{service_address}" if config["service_env_name"]
     @defn["environment"] << "#{config["servicehost_env_name"]}=#{service_host}" if config["servicehost_env_name"]
 
-    if is_app?
-      @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
-      @defn["environment"] << "SERVICE_3000_CHECK_TCP=true"
-      @defn["environment"] << "SERVICE_3000_NAME=#{build_name}"
-      @defn["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.*/,urlprefix-/#{build_name} strip=/#{build_name}"
+    if expose_fabio?
+      if is_app?
+        @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
+        @defn["environment"] << "SERVICE_3000_CHECK_TCP=true"
+        @defn["environment"] << "SERVICE_3000_NAME=#{build_name}"
+        @defn["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}.peer.*/,urlprefix-/#{build_name} strip=/#{build_name}"
+      else
+        @defn["environment"] << "SERVICE_3000_CHECK_INTERVAL=15s"
+        @defn["environment"] << "SERVICE_3000_CHECK_TCP=true"
+        @defn["environment"] << "SERVICE_3000_NAME=#{build_name}-#{name}"
+        @defn["environment"] << "SERVICE_3000_TAGS=urlprefix-#{build_name}-#{name}.peer.*/,urlprefix-/#{build_name}-#{name} strip=/#{build_name}-#{name}"
+      end
     end
   end
 
@@ -161,19 +173,19 @@ class Service
       true
     end
   end
-  
+
   def account_name
     @account_name || "legacy"
   end
-  
+
   def product_name
     @product_name || "360"
   end
-  
+
   def consul_address
     "http://consul.#{account_name}.stage.art-internal.com"
   end
-  
+
   def vault_address
     if account_name == "legacy"
       "http://#{vault_host}"
@@ -185,11 +197,11 @@ class Service
   def vault_host
     "vault.#{account_name}.stage.art-internal.com"
   end
-  
+
   def service_address
     "https://#{service_host}"
   end
-  
+
   def service_host
     if account_name == "legacy"
       "#{build_name}.peer.articulate.zone"
