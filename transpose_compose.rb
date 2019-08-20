@@ -18,7 +18,7 @@ class Service
     @account_name = ARGV[2]
     @product_name = ARGV[3]
     @app_name = @build_name.split('-')[0...-1].join("-")
-    @expose_fabio = !(@defn["labels"] || {})["SERVICE_3000_NAME"].nil?
+    @original_labels = @defn["labels"]
 
     # A few required things
     @defn["environment"] ||= []
@@ -80,7 +80,13 @@ class Service
   end
 
   def expose_fabio?
-    !!@expose_fabio
+    if @original_labels.is_a?(Array)
+      @original_labels.any? {|label| label =~ /^SERVICE_3000_NAME=/ }
+    elsif @original_labels.is_a?(Hash)
+      !@original_labels["SERVICE_3000_NAME"].nil?
+    else
+      false
+    end
   end
 
   def reuse_app_image?
