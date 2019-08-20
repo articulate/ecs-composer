@@ -7,7 +7,7 @@ require 'ostruct'
 class Service
   DEFAULT_MEM_RESERVATION = '256m'
 
-  attr_reader :image_name, :build_name, :app_name
+  attr_reader :image_name, :build_name, :app_name, :name
 
   def initialize(name, defn)
     @name = name
