@@ -169,6 +169,10 @@ class Service
     # use the Dockerfile command if we're the app and nothing is yet specified
     command ||= `cat Dockerfile | grep CMD | sed 's/CMD //'`.strip if is_app?
 
+    if command.is_a?(String) && command =~ /^\[/
+      command = JSON.parse(command).join(" ")
+    end
+
     if !command.nil?
       @command = Array(command)
       yield
