@@ -35,6 +35,14 @@ class Service
     end
   end
 
+  def add_additional_fields(config)
+    if config["additional_fields"] && config["additional_fields"][@name]
+      config["additional_fields"][@name].each do |field, value|
+        @defn[field] = value
+      end
+    end
+  end
+
   def mount_volumes(config)
     if config["volumes"] && config["volumes"][@name]
       config["volumes"][@name].each do |container_path|
@@ -52,6 +60,7 @@ class Service
     setup_env(config)
     add_peer_env(config)
     mount_volumes(config)
+    add_additional_fields(config)
 
     build_command do
       prepare_system if is_app?
