@@ -45,6 +45,7 @@ class Service
 
   def mount_volumes(config)
     if config["volumes"] && config["volumes"][@name]
+      @defn["volumes"] = []
       config["volumes"][@name].each do |container_path|
         service_name = @name
         if container_path.include?(":")
