@@ -45,8 +45,15 @@ class Service
 
   def mount_volumes(config)
     if config["volumes"] && config["volumes"][@name]
+      @defn["volumes"] = []
       config["volumes"][@name].each do |container_path|
-        @defn["volumes"] << "/var/peer-storage/#{build_name}/#{@name}:#{container_path}"
+        service_name = @name
+        if container_path.include?(":")
+          container_path_array = container_path.split(":")
+          service_name = container_path_array[0]
+          container_path = container_path_array[1]
+        end
+        @defn["volumes"] << "/var/peer-storage/#{build_name}/#{service_name}:#{container_path}"
       end
     end
   end
