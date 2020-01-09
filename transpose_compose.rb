@@ -69,7 +69,7 @@ class Service
     mount_volumes(config)
     add_additional_fields(config)
 
-    build_command do
+    build_command(config) do
       prepare_system if is_app?
       delay_for_database if db_required?
     end
@@ -179,7 +179,7 @@ class Service
     @command.unshift "make peer-prepare"
   end
 
-  def build_command
+  def build_command(config)
     command = @defn["command"]
 
     # use the Dockerfile command if we're the app and nothing is yet specified
@@ -192,7 +192,8 @@ class Service
     if !command.nil?
       @command = Array(command)
       yield
-      @command = ["bash", "-c", @command.join(" && ")]
+      shell = config["shells"] && config["shells"][@name] ? config["shells"][@name] : "bash"
+      @command = ["#{shell}", "-c", @command.join(" && ")]
       @defn['command'] = @command
     else
       # No command modification
