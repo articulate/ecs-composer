@@ -147,8 +147,10 @@ class Service
 
   def add_peer_env(config)
     @defn["environment"] << "APP_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.start_with?('APP_NAME=') }
+    @defn["environment"] << "SERVICE_NAME=#{app_name}" unless @defn["environment"].any? { |e| e.start_with?('SERVICE_NAME=') }
     @defn["environment"] << "SERVICE_PRODUCT=#{product_name}" unless @defn["environment"].any? { |e| e.start_with?('SERVICE_PRODUCT=') }
     @defn["environment"] << "APP_ENV=peer-#{build_name}"
+    @defn["environment"] << "SERVICE_ENV=peer-#{build_name}" unless @defn["environment"].any? { |e| e.start_with?('SERVICE_ENV=') }
     @defn["environment"] << "VAULT_ADDR=#{vault_address}"
     @defn["environment"] << "CONSUL_ADDR=#{consul_address}"
     @defn["environment"] << "SYSTEM_URL=#{service_host}"
