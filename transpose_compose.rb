@@ -234,7 +234,7 @@ class Service
   def service_host
     if account_name == "legacy"
       "#{build_name}.peer.articulate.zone"
-    elsif account_name == "legacy"
+    elsif account_name == "360"
       "#{build_name}.peer.360.articulate.zone"
     else
       "#{build_name}.peer.rise.zone"
